@@ -1,8 +1,9 @@
+$def with (title,say,blogs)
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>xiaobo&#39;s blog</title>
+    <title>$title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -32,7 +33,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">xiaobo&#39;s blog</a>
+          <a class="brand" href="#">$title</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -65,14 +66,15 @@
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h1>hello, world</h1>
+            <h1>$say</h1>
           </div>
           <div class="row-fluid">
-            <div class="span4">
-              <h2>hello,world</h2>
-              <p>...</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
+            $for blog in blogs:
+                <div class="span4">
+                  <h2>$blog['title']</h2>
+                  <p>$blog['summary']</p>
+                  <p><a class="btn" href="#">View details &raquo;</a></p>
+                </div><!--/span-->
           </div><!--/row-->
           </div><!--/row-->
         </div><!--/span-->
