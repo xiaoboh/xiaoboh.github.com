@@ -1,8 +1,9 @@
+$def with (content)
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>xiaobo&#39;s blog</title>
+    <title>$title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -32,7 +33,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">xiaobo&#39;s blog</a>
+          <a class="brand" href="/">$title</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="/">Home</a></li>
@@ -49,51 +50,10 @@
             <div class="container">
 
                 <div class="hero-unit">
-                    <h1>xiaobo&#39;s blog</h1>
+                    <h1>$title</h1>
                 </div>
 
-                <div class="row">
-    <div class="span4">
-        <blockquote>
-            <p>#自己写了一个静态博客生成器
-</p>
-            <small>用python写的一个简单的博客生成器,我当前这个博客就是能过它生成，目标只有一个就是简单。
-</small>
-            <small>2013-02-01 10:03:02</small>
-            <p><a class="btn" href="static/html/static_blog_sys.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#abc
-</p>
-            <small></small>
-            <small>2013-02-01 06:19:52</small>
-            <p><a class="btn" href="static/html/abc.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#test
-</p>
-            <small></small>
-            <small>2013-02-01 06:17:46</small>
-            <p><a class="btn" href="static/html/test.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#hello, world
-</p>
-            <small>
-</small>
-            <small>2013-02-01 06:16:23</small>
-            <p><a class="btn" href="static/html/helloworld.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-</div><!--/row-->
-
-
+                $:content
 
             </div><!--/container-->
         </div><!--/row-->

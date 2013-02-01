@@ -53,44 +53,25 @@
                 </div>
 
                 <div class="row">
-    <div class="span4">
-        <blockquote>
-            <p>#自己写了一个静态博客生成器
-</p>
-            <small>用python写的一个简单的博客生成器,我当前这个博客就是能过它生成，目标只有一个就是简单。
-</small>
-            <small>2013-02-01 10:03:02</small>
-            <p><a class="btn" href="static/html/static_blog_sys.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#abc
-</p>
-            <small></small>
-            <small>2013-02-01 06:19:52</small>
-            <p><a class="btn" href="static/html/abc.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#test
-</p>
-            <small></small>
-            <small>2013-02-01 06:17:46</small>
-            <p><a class="btn" href="static/html/test.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#hello, world
-</p>
-            <small>
-</small>
-            <small>2013-02-01 06:16:23</small>
-            <p><a class="btn" href="static/html/helloworld.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
+    <div class="span12">
+        <h1>自己写了一个静态博客生成器</h1>
+<p>用python写的一个简单的博客生成器,我当前这个博客就是能过它生成，目标只有一个就是简单。</p>
+<p>刚注册了一个域名，所以就想用github来建立一个blog，看了几个其它的系统，用起来安装的东西太多。所以自己就直接用python写了一个,原则只有一个：简单。</p>
+<h3>详细内容</h3>
+<ol>
+<li>博客生成是用web.py的template功能，与python的markdown模块结合生成静态的页面</li>
+<li>博客原文是用vim+plasticboy/vim-markdown(github)来写</li>
+</ol>
+<h3>用法很简单：</h3>
+<ol>
+<li>将用markdown格式写的好博客放到 blog_raw目录，名字无限制。</li>
+<li>然后在项目的根目录调用： python test_app.py 启动测试程序，就可以写的你新添加到blog已经可以看到。</li>
+<li>最后，用git提交所有修改到github，就可以了。</li>
+</ol>
+<h3>实现</h3>
+<p>实现方法是非常简单的，python的代码还不到100行。html/css相关的内容采用了Bootstrap。
+代码直接的github上:<a href="https://github.com/xiaoboh/xiaoboh.github.com">xiaobo.blog</a></p>
+    </div><!--/span12-->
 </div><!--/row-->
 
 

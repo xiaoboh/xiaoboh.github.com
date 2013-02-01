@@ -1,106 +1,13 @@
-$def with (title,say,blogs)
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>$title</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <!-- Le styles -->
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-      .sidebar-nav {
-        padding: 9px 0;
-      }
-    </style>
-    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
-
-  </head>
-
-  <body>
-
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">$title</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
-
-    <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span3">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li class="nav-header">分类</li>
-              <li class="active"><a href="#">Link</a></li>
-              <li><a href="#">c/c++</a></li>
-              <li><a href="#">python/go</a></li>
-              <li><a href="#">nosql</a></li>
-              <li><a href="#">hadoop</a></li>
-              <li class="nav-header">标签</li>
-              <li><a href="#">redis</a></li>
-              <li><a href="#">hadoop</a></li>
-              <li class="nav-header">联接</li>
-              <li><a href="http://fermion42.info">fermion42</a></li>
-            </ul>
-          </div><!--/.well -->
+$def with (title,blogs)
+<div class="row">
+    $for blog in blogs:
+        <div class="span4">
+            <blockquote>
+                <p>$blog['title']</p>
+                <small>$blog['summary']</small>
+                <small>$blog['time']</small>
+                <p><a class="btn" href="$blog['href']">View details &raquo;</a></p>
+            </blockquote>
         </div><!--/span-->
-        <div class="span9">
-          <div class="hero-unit">
-            <h1>$say</h1>
-          </div>
-          <div class="row-fluid">
-            $for blog in blogs:
-                <div class="span4">
-                  <h2>$blog['title']</h2>
-                  <p>$blog['summary']</p>
-                  <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-          </div><!--/row-->
-          </div><!--/row-->
-        </div><!--/span-->
-      </div><!--/row-->
-
-      <hr>
-
-    </div><!--/.fluid-container-->
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/jquery.js"></script>
-    <script src="/static/js/bootstrap-transition.js"></script>
-    <script src="/static/js/bootstrap-alert.js"></script>
-    <script src="/static/js/bootstrap-modal.js"></script>
-    <script src="/static/js/bootstrap-dropdown.js"></script>
-    <script src="/static/js/bootstrap-scrollspy.js"></script>
-    <script src="/static/js/bootstrap-tab.js"></script>
-    <script src="/static/js/bootstrap-tooltip.js"></script>
-    <script src="/static/js/bootstrap-popover.js"></script>
-    <script src="/static/js/bootstrap-button.js"></script>
-    <script src="/static/js/bootstrap-collapse.js"></script>
-    <script src="/static/js/bootstrap-carousel.js"></script>
-    <script src="/static/js/bootstrap-typeahead.js"></script>
-
-  </body>
-</html>
+</div><!--/row-->
 
