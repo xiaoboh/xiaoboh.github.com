@@ -6,18 +6,20 @@ import codecs
 import time
 
 
-title = "xiaobo's blog"
+title = "xiaobo blog"
+domain = 'xiaobo.info'
+url = 'http://xiaobo.info'
+
 src_dir = 'blog_raw'
 dst_dir = 'static/html'
 
 render = web.template.render('templates'
         , base='base'
-        , globals={'title':title})
+        , globals={'title':title, 'domain':domain, 'url':url})
 
 
 def get_blogs():
     blogs = []
-    odd = True
     for f in os.listdir( src_dir ):
         fpath = os.path.join( src_dir, f )
         bf = open( fpath )
@@ -25,17 +27,15 @@ def get_blogs():
 
         blog = dict( title=bf.readline()
                 , summary=bf.readline()
-                , odd=odd 
                 , time=time.strftime("%Y-%m-%d %X", time.gmtime(os.path.getmtime(fpath)))
                 , href=blogf )
-        odd = not odd
         blogs.append(blog)
 
     return sorted(blogs, key=lambda x:x['time'], reverse=True)
 
 
 def build_index():
-    html = render.main( title, get_blogs() )
+    html = render.main( get_blogs() )
     open('index.html','w').write( str(html) )
 
 
@@ -48,7 +48,8 @@ def build_blogs():
             continue
 
         text = codecs.open( blog_src, mode='r', encoding='utf8' ).read()
-        html = render.blog( markdown.markdown(text) )
+        html = render.blog( markdown.markdown(text), f, f
+                , "{0}//{1}".format(url, blog_dst)  )
         open( blog_dst, 'w').write( str(html) )
 
 

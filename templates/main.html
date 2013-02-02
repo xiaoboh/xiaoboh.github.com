@@ -1,4 +1,8 @@
-$def with (title,blogs)
+$def with (blogs)
+$var article_key: $domain 
+$var article_title: $title
+$var article_url: $url
+
 <div class="row">
     $for blog in blogs:
         <div class="span4">

@@ -53,7 +53,38 @@ $def with (content)
                     <h1>$title</h1>
                 </div>
 
-                $:content
+                <div class="row-fluid">
+                    <div class="span8">
+                        $:content
+                    </div>
+
+                    <div class="span4">
+                        <div class="well sidebar-nav">
+                            <address>
+                                <a href="mailto:#">xiaobo.h@qq.com</a>
+                            </address>
+                        </div><!--/.well -->
+                    </div><!--/span-->
+
+                </div><!--/row-fluid-->
+
+<hr>
+
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread" data-thread-key="$content.article_key" data-title="$content.article_title" data-url="$content.article_url" ></div>
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"xiaoboblog"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+    
 
             </div><!--/container-->
         </div><!--/row-->

@@ -1,6 +1,10 @@
-$def with (blog)
+$def with (blog, article_key, article_title, article_url)
+$var article_key: $article_key
+$var article_title: $article_title
+$var article_url: $article_url
+
 <div class="row">
-    <div class="span12">
+    <div class="span8">
         $:blog
     </div><!--/span12-->
 </div><!--/row-->

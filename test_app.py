@@ -9,8 +9,7 @@ urls = ( "/", "Blog",
 
 class Blog:
     def GET(self):
-        return config.render.main( config.title
-                , config.get_blogs() )
+        return config.render.main( config.get_blogs() )
 
 
 app = web.application(urls, globals())
