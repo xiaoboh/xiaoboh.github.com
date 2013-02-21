@@ -1,0 +1,102 @@
+#nginx_http_push_module简介
+nginx_http_push_module是一个nginx模块，提供基于长连接的消息推送功能
+
+##简介
+  公司的新产品需要向手机上的APP提供一个消息推送功能，本来是打算 自己用python或go来写一个，在做之前，就习惯性的在github上搜索了一下，发现了一个采用nginx模块来实现push server功能的项目，了解一下后感觉很不错，就打算直接用这个了。
+  在用之前打算先学习一个这个模块的代码，同时也学学nginx模块开发相关的内容。
+
+
+##一些概念
+  + LongPool:
+  + COMET:
+  + C10k problem: 服务程序如何处理1W+客户端连接的问题。
+  + NHPM: 我以在下文中用此简写来代表nginx_http_push_module
+
+##NHPM
+  + 主页: http://pushmodule.slact.net
+  + github: http://github.com/slact/nginx_http_push_module
+
+##安装
+  + 下载push module，直接从github下载其源码:
+    git clone git://github.com/slact/nginx_http_push_module.git
+
+  + 安装
+    nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
+      http://nginx.org/download/nginx-1.2.7.tar.gz
+    然后编译nginx，编译时添加NHPM模块:
+
+      ./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
+      make
+      make install
+
+
+##配置
+    我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：
+
+     worker_processes 2;
+     
+     debug_points  stop;
+     
+     error_log  logs/error.log;
+     
+     pid        logs/nginx.pid;
+
+     events {
+        worker_connections  1000;
+     }   
+
+     http {
+        server{
+            listen       8080;
+   
+            location /publish {
+                set $push_channel_id $arg_id;
+                push_publisher;
+                push_store_messages on;
+                push_message_timeout 2h;
+                push_max_message_buffer_length 100;
+   
+            }
+
+            location /activity {
+                push_subscriber;
+                set $push_channel_id $arg_id;
+                push_subscriber_concurrency broadcast;
+                default_type text/plain;
+            }
+         }
+     }
+
+修改好配置文件后，就可启动nginx:
+   
+     cd /opt/ngx-test/sbin
+     ./nginx
+
+    
+##测试
+###客户端  
+在浏览器中打开以下连接，你会发现这个连接会阻塞，只有当你从服务端push一个消息到111管道时，客户端才会返回:
+
+     http://192.168.1.10:8080/activity/?id=111
+
+
+###服务端 
+我是通过python脚本来发送push请求的，脚本内容如下：
+
+
+     import urllib2
+    
+     PUBLISHER_URL = 'http://192.169.1.10:8080/publish/?id=111'
+    
+     if __name__ == '__main__':
+         res = urllib2.urlopen(PUBLISHER_URL, "hi, i am a msg")
+
+
+将此脚本保存为:test_server.py,然后执行:
+    
+     python test_server.py 
+
+此时端应可收到信息！
+
+
+

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>xiaobo blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">xiaobo blog</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="/">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="container">
+
+                <div class="hero-unit">
+                    <h1>xiaobo blog</h1>
+                </div>
+
+                <div class="row-fluid">
+                    <div class="span8">
+                        
+<div class="row">
+    <div class="span8">
+        <h1>nginx_http_push_module简介</h1>
+<p>nginx_http_push_module是一个nginx模块，提供基于长连接的消息推送功能</p>
+<h2>简介</h2>
+<p>公司的新产品需要向手机上的APP提供一个消息推送功能，本来是打算 自己用python或go来写一个，在做之前，就习惯性的在github上搜索了一下，发现了一个采用nginx模块来实现push server功能的项目，了解一下后感觉很不错，就打算直接用这个了。
+  在用之前打算先学习一个这个模块的代码，同时也学学nginx模块开发相关的内容。</p>
+<h2>一些概念</h2>
+<ul>
+<li>LongPool:</li>
+<li>COMET:</li>
+<li>C10k problem: 服务程序如何处理1W+客户端连接的问题。</li>
+<li>NHPM: 我以在下文中用此简写来代表nginx_http_push_module</li>
+</ul>
+<h2>NHPM</h2>
+<ul>
+<li>主页: http://pushmodule.slact.net</li>
+<li>github: http://github.com/slact/nginx_http_push_module</li>
+</ul>
+<h2>安装</h2>
+<ul>
+<li>
+<p>下载push module，直接从github下载其源码:
+    git clone git://github.com/slact/nginx_http_push_module.git</p>
+</li>
+<li>
+<p>安装
+    nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
+      http://nginx.org/download/nginx-1.2.7.tar.gz
+    然后编译nginx，编译时添加NHPM模块:</p>
+<p>./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
+  make
+  make install</p>
+</li>
+</ul>
+<h2>配置</h2>
+<pre><code>我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：
+
+ worker_processes 2;
+
+ debug_points  stop;
+
+ error_log  logs/error.log;
+
+ pid        logs/nginx.pid;
+
+ events {
+    worker_connections  1000;
+ }
+
+ http {
+    server{
+        listen       8080;
+
+        location /publish {
+            set $push_channel_id $arg_id;
+            push_publisher;
+            push_store_messages on;
+            push_message_timeout 2h;
+            push_max_message_buffer_length 100;
+
+        }
+
+        location /activity {
+            push_subscriber;
+            set $push_channel_id $arg_id;
+            push_subscriber_concurrency broadcast;
+            default_type text/plain;
+        }
+     }
+ }
+</code></pre>
+<p>修改好配置文件后，就可启动nginx:</p>
+<pre><code> cd /opt/ngx-test/sbin
+ ./nginx
+</code></pre>
+<h2>测试</h2>
+<h3>客户端</h3>
+<p>在浏览器中打开以下连接，你会发现这个连接会阻塞，只有当你从服务端push一个消息到111管道时，客户端才会返回:</p>
+<pre><code> http://192.168.1.10:8080/activity/?id=111
+</code></pre>
+<h3>服务端</h3>
+<p>我是通过python脚本来发送push请求的，脚本内容如下：</p>
+<pre><code> import urllib2
+
+ PUBLISHER_URL = 'http://192.169.1.10:8080/publish/?id=111'
+
+ if __name__ == '__main__':
+     res = urllib2.urlopen(PUBLISHER_URL, "hi, i am a msg")
+</code></pre>
+<p>将此脚本保存为:test_server.py,然后执行:</p>
+<pre><code> python test_server.py
+</code></pre>
+<p>此时端应可收到信息！</p>
+    </div><!--/span12-->
+</div><!--/row-->
+
+
+                    </div>
+
+                    <div class="span4">
+                        <div class="well sidebar-nav">
+                            <address>
+                                <a href="mailto:#">xiaobo.h@qq.com</a>
+                            </address>
+                        </div><!--/.well -->
+                    </div><!--/span-->
+
+                </div><!--/row-fluid-->
+
+<hr>
+
+<!-- Duoshuo Comment BEGIN -->
+        <div class="ds-thread" data-thread-key="ngx_push_module_learn_1.mkd" data-title="ngx_push_module_learn_1.mkd" data-url="http://xiaobo.info//static/html/ngx_push_module_learn_1.html" ></div>
+        <script type="text/javascript">
+        var duoshuoQuery = {short_name:"xiaoboblog"};
+        (function() {
+                var ds = document.createElement('script');
+                ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                ds.charset = 'UTF-8';
+                (document.getElementsByTagName('head')[0] 
+                || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+        </script>
+<!-- Duoshuo Comment END -->
+    
+
+            </div><!--/container-->
+        </div><!--/row-->
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/bootstrap.js"></script>
+
+  </body>
+</html>
+
