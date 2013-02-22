@@ -64,36 +64,38 @@
   在用之前打算先学习一个这个模块的代码，同时也学学nginx模块开发相关的内容。</p>
 <h2>一些概念</h2>
 <ul>
-<li>LongPool:</li>
-<li>COMET:</li>
+<li>Polling: 轮询，定时请求服务端，查询是否有新的数据， 不断循环。</li>
+<li>COMET: 向服务端发起请求后, 这个连接永不断开， 服务端在有新数据后将数据回发给客户端，但不断开连接，sleep一会，等一会有没有新的数据。</li>
+<li>Long Polling: COMET的改进， 向服务端发起请求后，服务端只有等到有数据时才返回，然后，断开连接，之后，客户端再次发起请求。 </li>
+<li>Web Socket: HTML5引进的新技术，使B与S之间建立一个双向的通道，双方都可方便的即时交换数据。</li>
 <li>C10k problem: 服务程序如何处理1W+客户端连接的问题。</li>
 <li>NHPM: 我以在下文中用此简写来代表nginx_http_push_module</li>
 </ul>
 <h2>NHPM</h2>
 <ul>
-<li>主页: http://pushmodule.slact.net</li>
-<li>github: http://github.com/slact/nginx_http_push_module</li>
+<li>主页: <a href="http://pushmodule.slact.net">http://pushmodule.slact.net</a></li>
+<li>github: <a href="http://github.com/slact/nginx_http_push_module">http://github.com/slact/nginx_http_push_module</a></li>
 </ul>
 <h2>安装</h2>
 <ul>
 <li>
-<p>下载push module，直接从github下载其源码:
-    git clone git://github.com/slact/nginx_http_push_module.git</p>
+<p>下载push module，直接从github下载其源码:</p>
+<p>git clone git://github.com/slact/nginx_http_push_module.git</p>
 </li>
 <li>
 <p>安装
-    nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
-      http://nginx.org/download/nginx-1.2.7.tar.gz
-    然后编译nginx，编译时添加NHPM模块:</p>
-<p>./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
-  make
-  make install</p>
+nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
+    <a href="http://nginx.org/download/nginx-1.2.7.tar.gz">http://nginx.org/download/nginx-1.2.7.tar.gz</a></p>
 </li>
 </ul>
+<p>然后编译nginx，编译时添加NHPM模块:</p>
+<pre><code>./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
+make
+make install
+</code></pre>
 <h2>配置</h2>
-<pre><code>我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：
-
- worker_processes 2;
+<p>我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：</p>
+<pre><code> worker_processes 2;
 
  debug_points  stop;
 

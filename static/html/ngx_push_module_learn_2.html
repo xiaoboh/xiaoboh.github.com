@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>xiaobo blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">xiaobo blog</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="/">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="container">
+
+                <div class="hero-unit">
+                    <h1>xiaobo blog</h1>
+                </div>
+
+                <div class="row-fluid">
+                    <div class="span8">
+                        
+<div class="row">
+    <div class="span8">
+        <h1>nginx_http_push_module配置参数说明</h1>
+<p>详细说明nginx_http_push_module的配置参数</p>
+<h2>变量参数</h2>
+<h4>$push_channel_id</h4>
+<p>信道标识ID，在出现push_subscriber 或 push_publisher的上下文中必须提供此参数。</p>
+<blockquote>
+<p>例如：</p>
+</blockquote>
+<pre><code>location sub {
+  push_subscriber;
+  set $push_channel_id $arg_id;
+  # 按照以上配置客户端对id为111的信道定阅的url地址应该为：
+  # http://ServerIP/sub?id=111
+}
+</code></pre>
+<h2>指令</h2>
+<h3>基本指令：定阅、发布</h3>
+<h4>push_subscriber [ long-poll | interval-poll ]</h4>
+<ul>
+<li>默认值: long-poll</li>
+<li>上下文: server, location</li>
+</ul>
+<p>设定一个server或location作为一个消息的订阅接口。</p>
+<h4>push_subscriber_concurrency [ last | first | broadcast ]</h4>
+<ul>
+<li>默认值: broadcast</li>
+<li>上下文: http, server, location</li>
+</ul>
+<p>设定当对同一个信道有多个订阅时的处理方式：
+<em> last: 只保留最近一个订阅请求。
+</em> first: 只保留最早一个订阅请求。
+* broadcast: 保留所有订阅请求。</p>
+<h4>push_publisher</h4>
+<ul>
+<li>默认值: none</li>
+<li>上下文: server, location</li>
+</ul>
+<p>设定一个server或location作为一个消息的发布接口。</p>
+<blockquote>
+<p>示例：</p>
+</blockquote>
+<pre><code>location sub {
+  push_subscriber;
+  set $push_channel_id $arg_id;
+  push_subscriber_concurrency broadcast;
+}
+
+location pub {
+  push_publisher;
+  set $push_channel_id $arg_id;
+}
+
+# 按照以上配置，订阅与发布接口分别为:
+# 订阅: http://ServerIP/sub?id=1
+# 发布: http://ServerIP/pub?id=1
+</code></pre>
+<h3>消息相关</h3>
+<h4>push_store_messages [ on | off ]</h4>
+<ul>
+<li>默认值: on</li>
+<li>上下文: http, server, location</li>
+</ul>
+<h4>push_max_reserved_memory [ size ]</h4>
+<ul>
+<li>默认值: 16M</li>
+<li>上下文: http</li>
+</ul>
+<p>用与消息队列与缓存的内存块大小。</p>
+<h4>push_min_message_buffer_length [ number ]</h4>
+<ul>
+<li>默认值: 1</li>
+<li>上下文: http, server, location</li>
+</ul>
+<p>消息队列最小保存个数</p>
+<h4>push_max_message_buffer_length [ number ]</h4>
+<ul>
+<li>默认值: 10</li>
+<li>上下文: http, server, location</li>
+</ul>
+<p>消息队列最大保存个数</p>
+<h4>push_message_buffer_length [ on | off ]</h4>
+<ul>
+<li>默认值: off</li>
+<li>上下文: http, server, location</li>
+</ul>
+<h4>push_delete_oldest_received_message [ off ]</h4>
+<ul>
+<li>默认值: 0</li>
+<li>上下文: http, server, location</li>
+</ul>
+<p>当消息被订阅者收到时，之个消息被删除。</p>
+<h4>push_message_timeout [ time ]</h4>
+<ul>
+<li>默认值: 1h</li>
+<li>上下文: http, server, location</li>
+</ul>
+<p>消息的有效时间。当此值为0时，表示没有时效限制。</p>
+<h3>安全相关</h3>
+<h4>push_authorized_channels_only [ on | off ]</h4>
+<ul>
+<li>默认值: off</li>
+<li>上下文: http, server, location</li>
+</ul>
+<h4>push_channel_group [ string ]</h4>
+<ul>
+<li>默认值: none</li>
+<li>上下文: server, location</li>
+</ul>
+<h4>push_max_channel_id_length [ number ]</h4>
+<ul>
+<li>默认值: 512</li>
+<li>上下文: main, server, location</li>
+</ul>
+<p>信通id的最大长度，超过会自动截断。</p>
+<h4>push_max_channel_subscribers [ number ]</h4>
+<ul>
+<li>默认值: 0</li>
+<li>上下文: main, server, location</li>
+</ul>
+<p>订阅请求的最大并发量。0表示无限制。</p>
+    </div><!--/span12-->
+</div><!--/row-->
+
+
+                    </div>
+
+                    <div class="span4">
+                        <div class="well sidebar-nav">
+                            <address>
+                                <a href="mailto:#">xiaobo.h@qq.com</a>
+                            </address>
+                        </div><!--/.well -->
+                    </div><!--/span-->
+
+                </div><!--/row-fluid-->
+
+<hr>
+
+<!-- Duoshuo Comment BEGIN -->
+        <div class="ds-thread" data-thread-key="ngx_push_module_learn_2.mkd" data-title="ngx_push_module_learn_2.mkd" data-url="http://xiaobo.info//static/html/ngx_push_module_learn_2.html" ></div>
+        <script type="text/javascript">
+        var duoshuoQuery = {short_name:"xiaoboblog"};
+        (function() {
+                var ds = document.createElement('script');
+                ds.type = 'text/javascript';ds.async = true;
+                ds.src = 'http://static.duoshuo.com/embed.js';
+                ds.charset = 'UTF-8';
+                (document.getElementsByTagName('head')[0] 
+                || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+        </script>
+<!-- Duoshuo Comment END -->
+    
+
+            </div><!--/container-->
+        </div><!--/row-->
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/bootstrap.js"></script>
+
+  </body>
+</html>
+

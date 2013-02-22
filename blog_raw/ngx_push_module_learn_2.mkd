@@ -1,0 +1,135 @@
+#nginx_http_push_module配置参数说明
+详细说明nginx_http_push_module的配置参数
+
+
+##变量参数
+#### $push_channel_id 
+信道标识ID，在出现push_subscriber 或 push_publisher的上下文中必须提供此参数。
+> 例如：
+
+    location sub {
+      push_subscriber;
+      set $push_channel_id $arg_id;
+      # 按照以上配置客户端对id为111的信道定阅的url地址应该为：
+      # http://ServerIP/sub?id=111
+    }
+
+
+    
+
+
+##指令
+###基本指令：定阅、发布
+
+####push_subscriber [ long-poll | interval-poll ]
+* 默认值: long-poll
+* 上下文: server, location
+
+设定一个server或location作为一个消息的订阅接口。
+
+
+####push_subscriber_concurrency [ last | first | broadcast ]
+* 默认值: broadcast
+* 上下文: http, server, location
+
+设定当对同一个信道有多个订阅时的处理方式：
+* last: 只保留最近一个订阅请求。
+* first: 只保留最早一个订阅请求。
+* broadcast: 保留所有订阅请求。
+
+
+####push_publisher
+* 默认值: none
+* 上下文: server, location
+
+设定一个server或location作为一个消息的发布接口。
+>示例：
+
+    
+    location sub {
+      push_subscriber;
+      set $push_channel_id $arg_id;
+      push_subscriber_concurrency broadcast;
+    }
+
+    location pub {
+      push_publisher;
+      set $push_channel_id $arg_id;
+    }
+
+    # 按照以上配置，订阅与发布接口分别为:
+    # 订阅: http://ServerIP/sub?id=1
+    # 发布: http://ServerIP/pub?id=1
+
+
+###消息相关
+####push_store_messages [ on | off ]
+* 默认值: on
+* 上下文: http, server, location
+
+
+####push_max_reserved_memory [ size ]
+* 默认值: 16M
+* 上下文: http
+
+用与消息队列与缓存的内存块大小。
+
+
+####push_min_message_buffer_length [ number ]
+* 默认值: 1
+* 上下文: http, server, location
+
+消息队列最小保存个数
+
+
+####push_max_message_buffer_length [ number ]
+* 默认值: 10
+* 上下文: http, server, location
+
+消息队列最大保存个数
+
+
+####push_message_buffer_length [ on | off ]
+* 默认值: off
+* 上下文: http, server, location
+
+####push_delete_oldest_received_message [ off ]
+* 默认值: 0
+* 上下文: http, server, location
+
+当消息被订阅者收到时，之个消息被删除。
+
+####push_message_timeout [ time ]
+* 默认值: 1h
+* 上下文: http, server, location
+
+消息的有效时间。当此值为0时，表示没有时效限制。
+
+
+###安全相关
+####push_authorized_channels_only [ on | off ]
+* 默认值: off
+* 上下文: http, server, location
+
+
+####push_channel_group [ string ]
+* 默认值: none
+* 上下文: server, location
+
+
+####push_max_channel_id_length [ number ]
+* 默认值: 512
+* 上下文: main, server, location
+
+信通id的最大长度，超过会自动截断。
+
+
+####push_max_channel_subscribers [ number ]
+* 默认值: 0
+* 上下文: main, server, location
+
+订阅请求的最大并发量。0表示无限制。
+
+
+
+

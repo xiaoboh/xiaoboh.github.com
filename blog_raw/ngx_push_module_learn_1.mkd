@@ -7,31 +7,35 @@ nginx_http_push_module是一个nginx模块，提供基于长连接的消息推�
 
 
 ##一些概念
-  + LongPool:
-  + COMET:
-  + C10k problem: 服务程序如何处理1W+客户端连接的问题。
-  + NHPM: 我以在下文中用此简写来代表nginx_http_push_module
++ Polling: 轮询，定时请求服务端，查询是否有新的数据， 不断循环。
++ COMET: 向服务端发起请求后, 这个连接永不断开， 服务端在有新数据后将数据回发给客户端，但不断开连接，sleep一会，等一会有没有新的数据。
++ Long Polling: COMET的改进， 向服务端发起请求后，服务端只有等到有数据时才返回，然后，断开连接，之后，客户端再次发起请求。 
++ Web Socket: HTML5引进的新技术，使B与S之间建立一个双向的通道，双方都可方便的即时交换数据。
++ C10k problem: 服务程序如何处理1W+客户端连接的问题。
++ NHPM: 我以在下文中用此简写来代表nginx_http_push_module
 
 ##NHPM
-  + 主页: http://pushmodule.slact.net
-  + github: http://github.com/slact/nginx_http_push_module
++ 主页: <http://pushmodule.slact.net>
++ github: <http://github.com/slact/nginx_http_push_module>
 
 ##安装
-  + 下载push module，直接从github下载其源码:
++ 下载push module，直接从github下载其源码:
+
     git clone git://github.com/slact/nginx_http_push_module.git
 
-  + 安装
-    nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
-      http://nginx.org/download/nginx-1.2.7.tar.gz
-    然后编译nginx，编译时添加NHPM模块:
++ 安装
+nginx的所有模块都是静态编译到nginx中的，所有我们也下载一份nginx的源代码:
+    <http://nginx.org/download/nginx-1.2.7.tar.gz>
 
-      ./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
-      make
-      make install
+然后编译nginx，编译时添加NHPM模块:
+
+    ./configure --add-module=path/to/nginx_http_push_module --prefix=/opt/ngx-test
+    make
+    make install
 
 
 ##配置
-    我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：
+  我把nginx安装到了/opt/ngx-test目录，我们通过修改/opt/ngx-test/conf/nginx.conf 来配置NHPM的功能。 将nginx.conf改为以下内容：
 
      worker_processes 2;
      
