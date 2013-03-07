@@ -26,6 +26,8 @@
 * 上下文: server, location
 
 设定一个server或location作为一个消息的订阅接口。
+* long-poll: 采用长连接方式
+* interval-poll: 采用不断轮询的方式
 
 
 ####push_subscriber_concurrency [ last | first | broadcast ]
@@ -67,6 +69,7 @@
 * 默认值: on
 * 上下文: http, server, location
 
+是否保存信息，值为on时：会将所有发布的信息，保存的和订阅者的消队列中，这样订阅者请求就可以收到其请求发出前发布的信息。反之，则不能。
 
 ####push_max_reserved_memory [ size ]
 * 默认值: 16M
@@ -79,25 +82,27 @@
 * 默认值: 1
 * 上下文: http, server, location
 
-消息队列最小保存个数
+消息队列最小保存个数, 当一个通道中的信息个数超过这个值时，系统会尝试去删除旧的信息。
 
 
 ####push_max_message_buffer_length [ number ]
 * 默认值: 10
 * 上下文: http, server, location
 
-消息队列最大保存个数
+消息队列最大保存个数, 当一个通道中的信息个数超过这个值时，系统会强制去删除旧的信息。
 
 
 ####push_message_buffer_length [ on | off ]
 * 默认值: off
 * 上下文: http, server, location
 
+设置消息队列的长度（最大长度＝最小长度＝此值）
+
 ####push_delete_oldest_received_message [ off ]
 * 默认值: 0
 * 上下文: http, server, location
 
-当消息被订阅者收到时，之个消息被删除。
+是否删除旧的消息，当为on时，如果历史消息的长度超过push_min_message_buffer_length时，将会对旧信息进行删除。
 
 ####push_message_timeout [ time ]
 * 默认值: 1h
@@ -111,11 +116,13 @@
 * 默认值: off
 * 上下文: http, server, location
 
+当值为on时，只能订阅已经存在的通道。反之，如果通道不存在会创建。
 
 ####push_channel_group [ string ]
 * 默认值: none
 * 上下文: server, location
 
+通过给通道的ID加一个前缀来分组
 
 ####push_max_channel_id_length [ number ]
 * 默认值: 512

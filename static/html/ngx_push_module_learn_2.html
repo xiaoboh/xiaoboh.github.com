@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>xiaobo blog</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <meta name="keywords" content="xiaobo,c,c++,nginx,pushserver,信息安全" />
+      <meta name="description" content="xiaobo's blog">
+      <meta name="author" content="xiaobo.h@qq.com">
 
-    <!-- Le styles -->
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <title>xiaobo blog</title>
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -18,7 +18,7 @@
         padding: 9px 0;
       }
     </style>
-    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
 
   </head>
 
@@ -79,7 +79,9 @@
 <li>默认值: long-poll</li>
 <li>上下文: server, location</li>
 </ul>
-<p>设定一个server或location作为一个消息的订阅接口。</p>
+<p>设定一个server或location作为一个消息的订阅接口。
+<em> long-poll: 采用长连接方式
+</em> interval-poll: 采用不断轮询的方式</p>
 <h4>push_subscriber_concurrency [ last | first | broadcast ]</h4>
 <ul>
 <li>默认值: broadcast</li>
@@ -119,6 +121,7 @@ location pub {
 <li>默认值: on</li>
 <li>上下文: http, server, location</li>
 </ul>
+<p>是否保存信息，值为on时：会将所有发布的信息，保存的和订阅者的消队列中，这样订阅者请求就可以收到其请求发出前发布的信息。反之，则不能。</p>
 <h4>push_max_reserved_memory [ size ]</h4>
 <ul>
 <li>默认值: 16M</li>
@@ -130,24 +133,25 @@ location pub {
 <li>默认值: 1</li>
 <li>上下文: http, server, location</li>
 </ul>
-<p>消息队列最小保存个数</p>
+<p>消息队列最小保存个数, 当一个通道中的信息个数超过这个值时，系统会尝试去删除旧的信息。</p>
 <h4>push_max_message_buffer_length [ number ]</h4>
 <ul>
 <li>默认值: 10</li>
 <li>上下文: http, server, location</li>
 </ul>
-<p>消息队列最大保存个数</p>
+<p>消息队列最大保存个数, 当一个通道中的信息个数超过这个值时，系统会强制去删除旧的信息。</p>
 <h4>push_message_buffer_length [ on | off ]</h4>
 <ul>
 <li>默认值: off</li>
 <li>上下文: http, server, location</li>
 </ul>
+<p>设置消息队列的长度（最大长度＝最小长度＝此值）</p>
 <h4>push_delete_oldest_received_message [ off ]</h4>
 <ul>
 <li>默认值: 0</li>
 <li>上下文: http, server, location</li>
 </ul>
-<p>当消息被订阅者收到时，之个消息被删除。</p>
+<p>是否删除旧的消息，当为on时，如果历史消息的长度超过push_min_message_buffer_length时，将会对旧信息进行删除。</p>
 <h4>push_message_timeout [ time ]</h4>
 <ul>
 <li>默认值: 1h</li>
@@ -160,11 +164,13 @@ location pub {
 <li>默认值: off</li>
 <li>上下文: http, server, location</li>
 </ul>
+<p>当值为on时，只能订阅已经存在的通道。反之，如果通道不存在会创建。</p>
 <h4>push_channel_group [ string ]</h4>
 <ul>
 <li>默认值: none</li>
 <li>上下文: server, location</li>
 </ul>
+<p>通过给通道的ID加一个前缀来分组</p>
 <h4>push_max_channel_id_length [ number ]</h4>
 <ul>
 <li>默认值: 512</li>
@@ -218,7 +224,7 @@ location pub {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
 
   </body>
 </html>
