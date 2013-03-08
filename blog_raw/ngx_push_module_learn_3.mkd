@@ -1,0 +1,113 @@
+#nginx_http_push_module配置与使用示例
+一个完整的示例，包括：nginx的配置文件，以及用python写的客户端使用代码。
+
+
+##PUSH Server: nginx配置
+nginx.conf文件内容:
+
+    events {
+        worker_connections  1024;
+    }
+    
+    http {
+    
+        server{
+    
+            listen 8080;
+    
+            location /sub {
+                push_subscriber;
+                set $push_channel_id $arg_id;
+                push_subscriber_concurrency broadcast;
+                push_store_messages off;
+            }
+    
+            location /pub {                                                    
+                push_publisher;
+                set $push_channel_id $arg_id;
+                push_store_messages off;
+            }
+        }
+    }
+
+
+
+##客户端:一个python写的消息收发客户端
+msg-client.py 文件内容:
+
+
+    import httplib
+    import threading
+    import sys
+    
+    g_pserv = '127.0.0.1:8080'
+    g_user = ''
+    
+    
+    def send_msg( user, msg, pserv):
+        conn = httplib.HTTPConnection(pserv)
+        conn.request("POST", "/pub/?id={0}".format(user), msg)
+        r = conn.getresponse()
+        print r.status
+    
+    def recv_msg( user, pserv):
+        conn = httplib.HTTPConnection(pserv)
+        headers = {'Connection':'Keep-Alive'}
+        conn.request("GET", "/sub/?id={0}".format(user), "", headers)
+        r = conn.getresponse()
+        return r.read()
+    
+    
+    class RecvMsg(threading.Thread):
+        def run(self):
+            while True:
+                r = recv_msg( g_user, g_pserv)
+                print
+                print 'Recv msg:', r
+                print
+    
+    
+    if __name__ == "__main__":
+        if len(sys.argv) != 3:
+            sys.exit(0)
+    
+        g_pserv = sys.argv[1]
+        g_user = sys.argv[2]
+    
+        rm = RecvMsg()
+        rm.setDaemon(True)
+        rm.start()
+    
+        while True:
+            i = raw_input("INPUT[user msg]:")
+            tmp = i.split()
+            if len(tmp) < 2:
+                continue
+            send_msg( tmp[0], tmp[1], g_pserv)
+    
+
+
+##执行
+共开两个客户端，一个为user1,另一个user2, 两个可以互发消息。
+启动方式：python msg-client.py ServerIP UserID
+这里的UserID其实就是通道ID，每个客户端一个自己的ID，这样就可以相互发信息。发消息时需要输入目标的UserID和具体信息内容。
+###user1
+
+    -> % python  msg-client.py 192.168.1.10:8080 user1
+    INPUT[user msg]:user2 abcdefg11111
+    201
+    INPUT[user msg]:
+    Recv msg: xyz5555
+
+
+###user2
+
+    -> % python  msg-client.py 192.168.1.10:8080 user2
+    INPUT[user msg]:
+    Recv msg: abcdefg11111
+    
+    
+    INPUT[user msg]:user1 xyz5555
+    201
+    INPUT[user msg]:
+

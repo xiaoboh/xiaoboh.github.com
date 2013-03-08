@@ -47,74 +47,105 @@
                     <div class="span8">
                         
 <div class="row">
-    <div class="span4">
-        <blockquote>
-            <p>#nginx_http_push_module配置与使用示例
-</p>
-            <small>一个完整的示例，包括：nginx的配置文件，以及用python写的客户端使用代码。
-</small>
-            <small>2013-03-08 07:35:42</small>
-            <p><a class="btn" href="static/html/ngx_push_module_learn_3.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#nginx_http_push_module配置参数说明
-</p>
-            <small>详细说明nginx_http_push_module的配置参数
-</small>
-            <small>2013-03-07 07:10:56</small>
-            <p><a class="btn" href="static/html/ngx_push_module_learn_2.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#nginx_http_push_module简介
-</p>
-            <small>nginx_http_push_module是一个nginx模块，提供基于长连接的消息推送功能
-</small>
-            <small>2013-02-22 08:45:56</small>
-            <p><a class="btn" href="static/html/ngx_push_module_learn_1.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#自己写了一个静态博客生成器
-</p>
-            <small>用python写的一个简单的博客生成器,我当前这个博客就是能过它生成，目标只有一个就是简单。
-</small>
-            <small>2013-02-01 10:03:02</small>
-            <p><a class="btn" href="static/html/static_blog_sys.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#abc
-</p>
-            <small></small>
-            <small>2013-02-01 06:19:52</small>
-            <p><a class="btn" href="static/html/abc.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#test
-</p>
-            <small></small>
-            <small>2013-02-01 06:17:46</small>
-            <p><a class="btn" href="static/html/test.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
-    <div class="span4">
-        <blockquote>
-            <p>#hello, world
-</p>
-            <small>
-</small>
-            <small>2013-02-01 06:16:23</small>
-            <p><a class="btn" href="static/html/helloworld.html">View details &raquo;</a></p>
-        </blockquote>
-    </div><!--/span-->
+    <div class="span8">
+        <h1>nginx_http_push_module配置与使用示例</h1>
+<p>一个完整的示例，包括：nginx的配置文件，以及用python写的客户端使用代码。</p>
+<h2>PUSH Server: nginx配置</h2>
+<p>nginx.conf文件内容:</p>
+<pre><code>events {
+    worker_connections  1024;
+}
+
+http {
+
+    server{
+
+        listen 8080;
+
+        location /sub {
+            push_subscriber;
+            set $push_channel_id $arg_id;
+            push_subscriber_concurrency broadcast;
+            push_store_messages off;
+        }
+
+        location /pub {                                                    
+            push_publisher;
+            set $push_channel_id $arg_id;
+            push_store_messages off;
+        }
+    }
+}
+</code></pre>
+<h2>客户端:一个python写的消息收发客户端</h2>
+<p>msg-client.py 文件内容:</p>
+<pre><code>import httplib
+import threading
+import sys
+
+g_pserv = '127.0.0.1:8080'
+g_user = ''
+
+def send_msg( user, msg, pserv):
+    conn = httplib.HTTPConnection(pserv)
+    conn.request("POST", "/pub/?id={0}".format(user), msg)
+    r = conn.getresponse()
+    print r.status
+
+def recv_msg( user, pserv):
+    conn = httplib.HTTPConnection(pserv)
+    headers = {'Connection':'Keep-Alive'}
+    conn.request("GET", "/sub/?id={0}".format(user), "", headers)
+    r = conn.getresponse()
+    return r.read()
+
+class RecvMsg(threading.Thread):
+    def run(self):
+        while True:
+            r = recv_msg( g_user, g_pserv)
+            print
+            print 'Recv msg:', r
+            print
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit(0)
+
+    g_pserv = sys.argv[1]
+    g_user = sys.argv[2]
+
+    rm = RecvMsg()
+    rm.setDaemon(True)
+    rm.start()
+
+    while True:
+        i = raw_input("INPUT[user msg]:")
+        tmp = i.split()
+        if len(tmp) &lt; 2:
+            continue
+        send_msg( tmp[0], tmp[1], g_pserv)
+</code></pre>
+<h2>执行</h2>
+<p>共开两个客户端，一个为user1,另一个user2, 两个可以互发消息。
+启动方式：python msg-client.py ServerIP UserID
+这里的UserID其实就是通道ID，每个客户端一个自己的ID，这样就可以相互发信息。发消息时需要输入目标的UserID和具体信息内容。</p>
+<h3>user1</h3>
+<pre><code>-&gt; % python  msg-client.py 192.168.1.10:8080 user1
+INPUT[user msg]:user2 abcdefg11111
+201
+INPUT[user msg]:
+Recv msg: xyz5555
+</code></pre>
+<h3>user2</h3>
+<pre><code>-&gt; % python  msg-client.py 192.168.1.10:8080 user2
+INPUT[user msg]:
+Recv msg: abcdefg11111
+
+INPUT[user msg]:user1 xyz5555
+201
+INPUT[user msg]:
+</code></pre>
+    </div><!--/span12-->
 </div><!--/row-->
 
 
@@ -133,7 +164,7 @@
 <hr>
 
 <!-- Duoshuo Comment BEGIN -->
-        <div class="ds-thread" data-thread-key="xiaobo.info" data-title="xiaobo blog" data-url="http://xiaobo.info" ></div>
+        <div class="ds-thread" data-thread-key="ngx_push_module_learn_3.mkd" data-title="ngx_push_module_learn_3.mkd" data-url="http://xiaobo.info//static/html/ngx_push_module_learn_3.html" ></div>
         <script type="text/javascript">
         var duoshuoQuery = {short_name:"xiaoboblog"};
         (function() {
