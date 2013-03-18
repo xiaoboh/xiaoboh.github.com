@@ -1,0 +1,188 @@
+#push server 服务端高并发测试记录
+对ngx_push_module的一个10W并发测试
+
+
+##目标
+  我当前的对服务端并发量的要求很少：10W，当前目标小的原因一是产品本身的需求，二就是没有更好的测试环境。
+
+##测试环境：
+  测试全部在虚拟机上进行，用KVM虚了3台CentOS6.0:
+  服务器：内存(2G)，CPU(3292Mhz)*1
+  客户端1：内存(1G)，CPU(3292Mhz)*1
+  客户端2：内存(1G)，CPU(3292Mhz)*1
+  
+  在两台客户端上分别与服务器建立64510个连接:( http://serip/sub?id=1 ).
+
+##服务端配置
+###limits.conf
+
+    [root@x-clond ~]# cat /etc/security/limits.conf 
+    # /etc/security/limits.conf
+    
+    *   soft    nofile 1024000
+    *   hard    nofile 1024000
+    
+    # End of file
+
+
+###sysctl.conf
+
+    [root@x-clond ~]# cat /etc/sysctl.conf 
+    # Kernel sysctl configuration file for Red Hat Linux
+    
+    net.ipv4.ip_local_port_range = 1024 65535
+    net.ipv4.tcp_tw_recycle = 1
+    net.ipv4.tcp_tw_reuse = 1
+    net.ipv4.tcp_syncookies = 1
+    net.core.somaxconn = 102400
+    net.core.netdev_max_backlog = 102400
+    net.ipv4.tcp_keepalive_time = 30
+
+    # 其它略...
+
+###nginx.conf
+
+    [root@x-clond conf]# cat nginx.conf
+    
+    worker_processes 1;
+    worker_rlimit_nofile 1024000;
+    
+    events {
+        use epoll;
+        worker_connections  1024000;
+    }
+    
+    
+    http {
+    
+        keepalive_timeout 60;
+        client_header_buffer_size 4k;
+        
+        server{
+    
+            listen 8080;
+    
+            location /sub {
+                push_subscriber;
+                set $push_channel_id $arg_id;
+                push_subscriber_concurrency broadcast;
+                push_store_messages off;
+            }
+    
+            location /pub {
+                push_publisher;
+                set $push_channel_id $arg_id;
+                push_store_messages off;
+            }
+    
+            location /ngx-s{
+                stub_status on;
+                access_log on;
+            }
+    
+        }
+    }
+
+
+##客户端配置
+  limits.conf 与 sysctl.conf 与服务端相同。
+
+
+##客户端测试代码（建立大量并发连接）
+
+
+    [root@x-clond-c1 ~]# cat http_client_concurrency.py 
+    # create a lot of connection to http server
+    import httplib
+    import sys
+    
+    def new_http_conn( ip , url ):
+        try:
+            conn = httplib.HTTPConnection(ip)
+            headers = {'Connection':'Keep-Alive'}
+            conn.request("GET", url, "", headers)
+            return conn 
+        except Exception, ex:
+            print ex
+    
+        return None
+    
+    
+    if __name__ == "__main__":
+        if len(sys.argv) != 3:
+            print "http_client_concurrency.py <ip> <url>"
+            sys.exit(0)
+    
+        conns = []
+        while True:
+            conn = new_http_conn( sys.argv[1], sys.argv[2] )
+            if not conn:
+                while True:
+                    ui = raw_input("Create Connection Failed, is continue create[y/n/e]:")
+                    if ui is 'y':
+                        break 
+                    if ui is 'e':
+                        sys.exit(0)
+                    continue
+    
+            conns.append(conn)
+            print "Cur Connection Count:", len(conns)
+    
+    
+##测试开始：
+###服务器
+ 启动nginx.
+
+###客户端
+ 启动并发测试脚本：
+
+    python http_client_concurrency.py 192.168.1.10:8080 "/sub?id=1"
+
+    
+##测试记录：内存与连接数变化
+
+### 1个连接
+
+    [root@x-clond sbin]# free ; echo ------; netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}'
+                 total       used       free     shared    buffers     cached
+    Mem:       1922880     541400    1381480          0      11488      57024
+    -/+ buffers/cache:     472888    1449992
+    Swap:      2097144          0    2097144
+    ------
+    ESTABLISHED 1
+
+
+### 64511个连接
+
+    [root@x-clond sbin]# free ; echo ------; netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}'
+                 total       used       free     shared    buffers     cached
+    Mem:       1922880    1404496     518384          0      11496      57028
+    -/+ buffers/cache:    1335972     586908
+    Swap:      2097144          0    2097144
+    ------
+    ESTABLISHED 64511
+
+
+### 129021个连接
+
+    [root@x-clond sbin]# free ; echo ------; netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}'
+                 total       used       free     shared    buffers     cached
+    Mem:       1922880    1852932      69948          0        800       9296
+    -/+ buffers/cache:    1842836      80044
+    Swap:      2097144     414040    1683104
+    ------
+    ESTABLISHED 129021
+
+
+##分析：
+  对以上数据进行分析， 以可得到每个连接所需要的内存大小：
+    
+   一个连接内存用量：  (1381480-69948+414040)/129020 = 13K
+   在这13K中，我们通过sysctl -a 可以看到:
+       net.ipv4.tcp_wmem 与 net.ipv4.tcp_rmem 都是 4K，这就占去了8K,还有5K应该是nginx中占用的，这其中又包括nginx自己与push server模块所占用的内存。
+
+   要想增加同样内存下，所能支持连接数，可以减少tcp_wmem,tcp_rmem的值，它们分别代表的是tcp发送与接收的内存buffer大小。
+
+  
+    
+
